@@ -31,7 +31,7 @@ def evaluate_expression(expression: str) -> float:
 
 # Run the server
 if __name__ == "__main__":
-    transport = "stdio"
+    transport = "sse"
     if transport == "stdio":
         print("Running server with stdio transport")
         mcp.run(transport="stdio")

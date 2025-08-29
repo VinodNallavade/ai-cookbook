@@ -3,3 +3,8 @@ python-dotenv
 openai
 ipykernel
 httpx
+azure-identity
+langchain-openai
+langgraph.prebuilt
+langgraph
+langchain_community
