@@ -6,6 +6,7 @@ from mcp.client.stdio import stdio_client
 from langchain_openai import AzureChatOpenAI
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import nest_asyncio
+from langchain_mcp_adapters.tools import load_mcp_tools
 token_provider = get_bearer_token_provider(
     DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
 )
@@ -27,7 +28,7 @@ async def main():
             await session.initialize()
             print(f"Connected to server")
             # fetch available tools
-            tools = await session.list_tools()
+            mcp_tools =await  load_mcp_tools(session)
 
             # Initialize OpenAI client
             llm = AzureChatOpenAI(
@@ -38,22 +39,8 @@ async def main():
                 azure_ad_token_provider=token_provider,
                 temperature=0,  # Adjust temperature as needed
             )
-
-            mcp_tools = [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": tool.name,
-                        "description": tool.description,
-                        "parameters": tool.inputSchema,
-                    },
-                }
-                for tool in tools.tools
-            ]
             for tool in mcp_tools:
-                print(
-                    f"Available tool: {tool['function']['name']} - {tool['function']['description']}"
-                )
+                    print(f"Available tool: {tool.name} - {tool.description}")
             agent = create_react_agent(
                 llm,
                 tools=mcp_tools,
@@ -66,10 +53,10 @@ async def main():
                 )
                 if user_input.lower() != "exit":
                     # Call the LLM with tools
-                    response = await agent.ainvoke({"messages": user_input})
-                    print(response)
-                    for m in response["messages"]:
-                        m.pretty_print()
+                   response = await agent.ainvoke({"messages": user_input})
+                   # Print only the last message
+                   last_message = response["messages"][-1]
+                   last_message.pretty_print()
                 else:
                     print("Exiting...")
                     break

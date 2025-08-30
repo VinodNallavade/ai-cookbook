@@ -8,3 +8,4 @@ langchain-openai
 langgraph.prebuilt
 langgraph
 langchain_community
+langchain_mcp_adapters
