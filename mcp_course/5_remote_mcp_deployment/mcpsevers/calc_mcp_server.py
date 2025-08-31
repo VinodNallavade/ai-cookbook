@@ -4,7 +4,7 @@ import os
 PORT = os.getenv("PORT", 10000)
 
 
-mcp = FastMCP(name="Calculator".host="0.0.0.0",port=PORT)
+mcp = FastMCP(name="Calculator",host="0.0.0.0",port=PORT)
 
 @mcp.tool()
 def add_numbers(a: float, b: float) -> float:   
