@@ -10,4 +10,4 @@ langgraph
 langchain_community
 langchain_mcp_adapters
 fastapi
-scalekit-sdk-python
+scalekit-sdk-python==2.3.0
