@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager,AsyncExitStack
-from mcpsevers.calc_mcp_server import mcp as math_mcp
-from mcpsevers.echo_mcp_server import mcp as echo_mcp
+from mcpservers.calc_mcp_server import mcp as math_mcp
+from mcpservers.echo_mcp_server import mcp as echo_mcp
 import os
+import json
+from fastapi.middleware.cors import CORSMiddleware
+from config import settings
+from auth import AuthMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,8 +17,40 @@ async def lifespan(app: FastAPI):
 
 
 api = FastAPI(lifespan= lifespan)
+
+
+
+origins = [
+    "http://localhost",
+    "http://localhost:6274"
+]
+# Add CORS middleware
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # In production, specify your actual origins
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+
+
+
+@api.get("/.well-known/oauth-protected-resource/math/mcp")
+async def get_oauth_math_mcp_metadata():
+    """Endpoint to expose OAuth metadata for math MCP."""
+    response =json.loads(settings.METADATA_JSON_RESPONSE)
+    return response
+
+
+
+api.add_middleware(AuthMiddleware)
+
 api.mount("/math", math_mcp.streamable_http_app())
 api.mount("/echo", echo_mcp.streamable_http_app())
+
+
+
 
 
 PORT = os.getenv("PORT", 10000)
